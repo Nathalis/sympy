@@ -11,8 +11,8 @@ sympy.stats.frv
 from rv import (RandomDomain, SingleDomain, ConditionalDomain, ProductDomain,
         PSpace, SinglePSpace, random_symbols, ProductPSpace)
 from sympy.functions.special.delta_functions import DiracDelta
-from sympy import (S, Interval, Dummy, FiniteSet, Mul, Integral, And, Or,
-        Piecewise, solve, cacheit, integrate, oo)
+from sympy import (S, Eq, Interval, Dummy, FiniteSet, Mul, Integral, And, Or,
+        Piecewise, solve, cacheit, diff, integrate, oo)
 from sympy.solvers.inequalities import reduce_poly_inequalities
 import random
 
@@ -170,6 +170,18 @@ class ContinuousPSpace(PSpace):
             density = self.domain.integrate(self.density, set(rs.symbol
                 for rs in self.values - frozenset((expr,))),  **kwargs)
             return expr.symbol, density
+        # For univariate expressions
+        if 1 == len(expr.free_symbols & self.values):
+            # Get the symbol (only univariate for now)
+            ## TODO: Account for positives/negatives correctly...
+            x = (expr.free_symbols & self.values).pop()
+            z = Dummy('z', real=True, finite=True, positive=True)
+            Ginv = solve(Eq(expr, z), x)
+            # TODO: Can you explicitly solve for only real solutions?
+            Ginv = filter(lambda g: g.is_real, Ginv)
+            density = (sum(self.density.subs({x.symbol: g}) *
+                abs(diff(g, z)) for g in Ginv))
+            return z, density
 
         z = Dummy('z', real=True, finite=True)
         return z, self.integrate(DiracDelta(expr - z), **kwargs)
@@ -240,7 +252,7 @@ class SingleContinuousPSpace(ContinuousPSpace, SinglePSpace):
     such as Normal, Exponential, Uniform, etc....
     """
     _count = 0
-    _name = 'x'
+    _name = 'X'
     def __new__(cls, symbol, density, set=Interval(-oo, oo)):
         assert symbol.is_Symbol
         domain = SingleContinuousDomain(symbol, set)

@@ -153,10 +153,10 @@ class PSpace(Basic):
     _name = 'space'
 
     @classmethod
-    def create_symbol(cls):
+    def create_symbol(cls, **args):
         cls._count += 1
         return Symbol('%s%d'%(cls._name, cls._count),
-                real=True, finite=True, bounded=True)
+                real=True, finite=True, bounded=True, **args)
 
 class SinglePSpace(PSpace):
     """
