@@ -151,8 +151,6 @@ class BernoulliPSpace(SingleFinitePSpace):
     >>> Density(X)
     {Heads: 1/2, Tails: 1/2}
     """
-
-    _name = 'bernoulli'
     def __new__(cls, p, succ=1, fail=0, symbol=None):
         succ, fail, p = map(sympify, (succ, fail, p))
         density = {succ:p, fail:(1-p)}
