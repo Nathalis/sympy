@@ -2,7 +2,7 @@ from sympy.stats import (Normal, LogNormal, Exponential, P, E, Where, Density,
         Var, Covar, Skewness, Gamma, Pareto, Weibull, Beta, Uniform, Given, pspace, CDF, ContinuousRV, Sample)
 from sympy import (Symbol, exp, S, N, pi, simplify, Interval, erf, Eq, symbols,
         sqrt, And, gamma, beta, Piecewise, Integral)
-from sympy.utilities.pytest import raises, XFAIL, slow
+from sympy.utilities.pytest import raises
 
 oo = S.Infinity
 
@@ -260,6 +260,7 @@ def test_input_value_assertions():
         raises(ValueError, "%s(p, a)" % fn_name)
         eval("%s(p, q)" % fn_name) # No error raised
 
+<<<<<<< HEAD
 def test_unevaluated():
     x = Symbol('x')
     X = Normal(0,1, symbol=x)
