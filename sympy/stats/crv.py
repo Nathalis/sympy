@@ -12,7 +12,7 @@ from rv import (RandomDomain, SingleDomain, ConditionalDomain, ProductDomain,
         PSpace, SinglePSpace, random_symbols, ProductPSpace)
 from sympy.functions.special.delta_functions import DiracDelta
 from sympy import (S, Eq, Interval, Dummy, FiniteSet, Mul, Integral, And, Or,
-        Piecewise, solve, cacheit, diff, integrate, oo)
+        Piecewise, solve, cacheit, diff, integrate, oo, Lambda)
 from sympy.solvers.inequalities import reduce_poly_inequalities
 import random
 
@@ -170,17 +170,26 @@ class ContinuousPSpace(PSpace):
             density = self.domain.integrate(self.density, set(rs.symbol
                 for rs in self.values - frozenset((expr,))),  **kwargs)
             return expr.symbol, density
-        # For univariate expressions
+        # For transformations of univariate expressions
         if 1 == len(expr.free_symbols & self.values):
-            # Get the symbol (only univariate for now)
-            ## TODO: Account for positives/negatives correctly...
+            # Get the symbol
             x = (expr.free_symbols & self.values).pop()
-            z = Dummy('z', real=True, finite=True, positive=True)
-            Ginv = solve(Eq(expr, z), x)
-            # TODO: Can you explicitly solve for only real solutions?
-            Ginv = filter(lambda g: g.is_real, Ginv)
+            
+            # Minimal interval transform support...
+            g = Lambda(x, expr)
+            x_set = self.domain.set
+            if min(g(x_set.left), g(x_set.right)) >= 0:
+                z_pos = True
+            else:
+                z_pos = None
+            z = Dummy('z', real=True, finite=True, positive=z_pos)
+
+            # Find all the real inverse equations
+            g_inv = solve(Eq(expr, z), x)
+            g_inv = filter(lambda g: g.is_real, g_inv)
+
             density = (sum(self.density.subs({x.symbol: g}) *
-                abs(diff(g, z)) for g in Ginv))
+                abs(diff(g, z)) for g in g_inv))
             return z, density
 
         z = Dummy('z', real=True, finite=True)

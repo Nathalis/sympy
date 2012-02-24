@@ -1,8 +1,8 @@
 from sympy.stats import (Normal, LogNormal, Exponential, P, E, Where, Density,
         Var, Covar, Skewness, Gamma, Pareto, Weibull, Beta, Uniform, Given, pspace, CDF, ContinuousRV, Sample)
-from sympy import (Symbol, exp, S, N, pi, simplify, Interval, erf, Eq, symbols,
-        sqrt, And, gamma, beta, Piecewise, Integral)
-from sympy.utilities.pytest import raises
+from sympy import (Symbol, exp, log, S, N, pi, simplify, Interval, erf, Eq, 
+        symbols, sqrt, And, gamma, beta, Piecewise, Integral)
+from sympy.utilities.pytest import raises, slow, XFAIL
 
 oo = S.Infinity
 
@@ -260,26 +260,20 @@ def test_input_value_assertions():
         raises(ValueError, "%s(p, a)" % fn_name)
         eval("%s(p, q)" % fn_name) # No error raised
 
-<<<<<<< HEAD
-def test_unevaluated():
-    x = Symbol('x')
-    X = Normal(0,1, symbol=x)
-    assert E(X, evaluate=False) == \
-            Integral(sqrt(2)*x*exp(-x**2/2)/(2*sqrt(pi)), (x, -oo, oo))
 
-    assert E(X+1, evaluate=False) == \
-            Integral(sqrt(2)*x*exp(-x**2/2)/(2*sqrt(pi)), (x, -oo, oo)) + 1
+def test_transform():
+    X = Exponential(3)
+    z, dens = Density(exp(X))
+    assert Eq(dens, 3/z**4)
+    z, dens = Density(X**S.Half)
+    assert Eq(dens, 6*z*exp(-3*z**2))
 
-    assert P(X>0, evaluate=False).args == \
-            Integral(sqrt(2)*exp(-x**2/2)/(2*sqrt(pi)), (x, 0, oo)).args
-
-    assert P(X>0, X**2<1, evaluate=False).args == \
-            Integral(sqrt(2)*exp(-x**2/2)/(2*sqrt(pi)*
-            Integral(sqrt(2)*exp(-x**2/2)/(2*sqrt(pi)),
-                (x, -1, 1))), (x, 0, 1)).args
+    Y = Gamma(3, 2)
+    z, dens = Density(exp(Y))
+    assert Eq(dens, log(z)**2/(16*z**(S(3)/2)))
 
 @XFAIL
-def test_transform_density():
+def test_transform_uniform():
     X = Uniform(1, 10)
     z, dens = Density(X**2)
     assert Eq(dens, Piecewise((0, sqrt(z)<1), (0, sqrt(z)>10),
