@@ -9,7 +9,8 @@ sympy.stats.frv
 """
 
 from rv import (RandomDomain, SingleDomain, ConditionalDomain, ProductDomain,
-        PSpace, SinglePSpace, random_symbols, ProductPSpace)
+        DistributionFunction, PSpace, SinglePSpace, random_symbols, 
+        ProductPSpace)
 from sympy.functions.special.delta_functions import DiracDelta
 from sympy import (S, Eq, Interval, Dummy, FiniteSet, Mul, Integral, And, Or,
         Piecewise, solve, cacheit, diff, integrate, oo)
@@ -138,6 +139,17 @@ class ConditionalContinuousDomain(ContinuousDomain, ConditionalDomain):
         else:
             raise NotImplementedError(
                     "Set of Conditional Domain not Implemented")
+
+class DensityFunction(DistributionFunction):
+    """
+    The distribution function of a continuous random variable is called a
+    probability density function.
+
+    The integration method is just integration of the function over the domain.
+    """
+    @classmethod
+    def _integrate(cls, var, expr, set):
+        return integrate(expr, (var, set.left, set.right))
 
 class ContinuousPSpace(PSpace):
     """

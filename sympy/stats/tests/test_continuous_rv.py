@@ -2,7 +2,7 @@ from sympy.stats import (Normal, LogNormal, Exponential, P, E, Where, Density,
         Var, Covar, Skewness, Gamma, Pareto, Weibull, Beta, Uniform, Given, pspace, CDF, ContinuousRV, Sample)
 from sympy import (Symbol, exp, S, N, pi, simplify, Interval, erf, Eq, symbols,
         sqrt, And, gamma, beta, Piecewise, Integral)
-from sympy.utilities.pytest import raises
+from sympy.utilities.pytest import raises, slow, XFAIL
 
 oo = S.Infinity
 

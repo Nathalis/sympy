@@ -4,6 +4,7 @@ from sympy.stats import (Die, Normal, Exponential , P, E, Var, Covar,
         Skewness, Density, Given, independent, dependent, Where, pspace,
         random_symbols, Sample)
 from sympy.stats.rv import ProductPSpace, rs_swap
+from sympy.stats.crv import DensityFunction
 from sympy.utilities.pytest import raises, XFAIL
 
 def test_where():
@@ -67,6 +68,19 @@ def test_overlap():
     Y = Normal(0, 2, symbol=Symbol('x'))
 
     raises(ValueError, "P(X>Y)")
+
+def test_DistributionFunction():
+    # Continuous
+    x = Symbol('x')
+    pdf = DensityFunction(x, 1/x**2, set=Interval(1, oo))
+    assert pdf(1) == 1
+    assert pdf(2) == S(1)/4
+
+    # Raises error unless you normalize it
+    raises(ValueError, "DensityFunction(x, x, set=Interval(0, 4))")
+    pdf = DensityFunction(x, x, set=Interval(0, 4), normalize=True)
+    assert pdf(2) == S(1)/4
+    assert pdf(3) == S(3)/8
 
 def test_ProductPSpace():
     X = Normal(0, 1)

@@ -12,8 +12,8 @@ sympy.stats.frv
 sympy.stats.rv_interface
 """
 
-from sympy import Basic, S, Expr, Symbol, Tuple, And, Add, Eq
-from sympy.core.sets import FiniteSet, ProductSet
+from sympy import Basic, S, Expr, Symbol, Tuple, And, Add, Eq, Lambda, oo
+from sympy.core.sets import FiniteSet, ProductSet, Interval
 
 class RandomDomain(Basic):
     """
@@ -337,6 +337,27 @@ class ProductDomain(RandomDomain):
 
     def as_boolean(self):
         return And(*[domain.as_boolean() for domain in self.domains])
+
+class DistributionFunction(Lambda):
+    """
+    A distribution function has two properties:
+    1. it is positive at every element in its domain.
+    2. the sum/integral over the domain is 1.
+    """
+    
+    def __new__(cls, variables, expr, set=Interval(-oo,oo),
+                check=True, normalize=False):
+        if normalize:
+            return Lambda.__new__(cls, variables, 
+                    expr/cls._integrate(variables, expr, set))
+        if check:
+            if cls._integrate(variables, expr, set) != 1:
+                raise ValueError("The function does not integrate to 1")
+        return Lambda.__new__(cls, variables, expr)
+
+    @classmethod
+    def _integrate(cls, variables, expr, set):
+        return NotImplementedError()
 
 def is_random(x):
     return isinstance(x, RandomSymbol)
